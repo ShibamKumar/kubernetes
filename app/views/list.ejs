@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .options {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .option {
+            margin: 0 10px;
+        }
+
+        .option a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .option a:hover {
+            background-color: #555;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>User List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Country</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach(function(user) { %>
+                <tr>
+                    
+                    <td><%= user.name %></td>
+                    <td><%= user.mobile %></td>
+                    <td><%= user.email %></td>
+                    <td><%= user.company %></td>
+                    <td><%= user.city %></td>
+                    <td><%= user.state %></td>
+                    <td><%= user.country %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+    <div class="options">
+        <div class="option">
+                <a href="/create">Create Users</a>
+        </div>
+    </div>
+</body>
+</html>
