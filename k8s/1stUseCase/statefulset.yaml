@@ -17,11 +17,6 @@ spec:
       containers:
       - name: mongodb
         image: mongo
-        # command:
-        #   - mongod
-        #   - "--auth"
-        #   - "--config"
-        #   - "/etc/mongodb.conf"
         ports:
         - containerPort: 27017
         volumeMounts:
