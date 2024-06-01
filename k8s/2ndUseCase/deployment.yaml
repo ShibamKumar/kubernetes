@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: shibamkumar/nodejs:latest
+        image: shibamkumar/nodejs:v2
         imagePullPolicy: Always
         resources:
           requests:
