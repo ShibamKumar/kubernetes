@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  namespace: multitier
+  labels:
+    app: api
+    app.kubernetes.io/part-of: multitier-demo
+spec:
+  replicas: 4
+
+  selector:
+    matchLabels:
+      app: api
+
+  # ── Rolling Update Strategy ───────────────────────────────────────────────
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+  template:
+    metadata:
+      labels:
+        app: api
+        version: "2.0.0"
+      annotations:
+        # Causes rolling restart whenever ConfigMap content changes
+        # (use: kubectl rollout restart deployment/api-deployment)
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/metrics"
+
+    spec:
+      # ── Graceful termination ──────────────────────────────────────────────
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: api
+          image: shibamkumar1234/k8s-api-service:2.0.2
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 3000
+              name: http
+
+          # ── Env: non-secret values from ConfigMap ─────────────────────────
+          envFrom:
+            - configMapRef:
+                name: db-config
+
+          # ── Env: secret value (DB password) ──────────────────────────────
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: DB_PASSWORD
+
+          # ── Resource Requests & Limits (FinOps) ──────────────────────────
+          resources:
+            requests:
+              cpu: "100m" 
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
+          # ── Liveness Probe: restart if app is stuck ───────────────────────
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # ── Readiness Probe: remove from LB if DB not reachable ───────────
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # ── Startup Probe: gives extra time on cold-start ─────────────────
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 12
+            periodSeconds: 5
