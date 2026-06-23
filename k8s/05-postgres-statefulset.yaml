@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: multitier
+  labels:
+    app: postgres
+    app.kubernetes.io/part-of: multitier-demo
+spec:
+  serviceName: "postgres-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      # ── Security context  ────────────────────────────────
+      securityContext:
+        fsGroup: 999
+
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5432
+              name: postgres
+
+          # ── Environment — non-secret values from ConfigMap ───────────────
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+
+          # ── Volume mounts ─────────────────────────────────────────────────
+          volumeMounts:
+            # Persistent data volume
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            # Init SQL script (runs once on first boot)
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
+
+          # ── Resource limits (FinOps) ──────────────────────────────────────
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          # ── Liveness probe ────────────────────────────────────────────────
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "appuser", "-d", "appdb"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          # ── Readiness probe ───────────────────────────────────────────────
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "appuser", "-d", "appdb"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+
+      volumes:
+        # PVC mounted as persistent data volume
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+        # Init SQL from ConfigMap
+        - name: init-sql
+          configMap:
+            name: postgres-init-sql
