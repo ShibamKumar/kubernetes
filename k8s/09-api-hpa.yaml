@@ -1,0 +1,47 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+  namespace: multitier
+  labels:
+    app: api
+    app.kubernetes.io/part-of: multitier-demo
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-deployment
+
+  minReplicas: 4   
+  maxReplicas: 8
+
+  metrics:
+    # ── CPU-based scaling ──────────────────────────────────────────────────
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+
+    # ── Memory-based scaling ───────────────────────────────────────────────
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: AverageValue
+          averageValue: 150Mi 
+
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 120
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60             
+    scaleUp:
+      stabilizationWindowSeconds: 0    
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 30
