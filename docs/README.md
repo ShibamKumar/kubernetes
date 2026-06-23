@@ -18,7 +18,7 @@ A fully containerized, production-grade two-tier application deployed on Amazon 
 
 ---
 
-## Architecture
+## HIGH Level Architecture Flow
 
 ```
 Internet → NLB → NGINX Ingress → API Service (4 pods)
