@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-sql
+  namespace: multitier
+  labels:
+    app.kubernetes.io/part-of: multitier-demo
+data:
+  init.sql: |
+    -- Create the employees table
+    CREATE TABLE IF NOT EXISTS employees (
+        id         SERIAL PRIMARY KEY,
+        name       VARCHAR(100) NOT NULL,
+        department VARCHAR(100) NOT NULL,
+        role       VARCHAR(100) NOT NULL,
+        salary     NUMERIC(10,2) NOT NULL,
+        join_date  DATE NOT NULL
+    );
+
+    -- Seed 8 records (idempotent — skip if already exist)
+    INSERT INTO employees (name, department, role, salary, join_date) VALUES
+        ('Alice Johnson',  'Engineering',  'Senior Software Engineer', 120000.00, '2021-03-15'),
+        ('Bob Smith',      'Engineering',  'DevOps Engineer',          105000.00, '2022-07-01'),
+        ('Carol Williams', 'Product',      'Product Manager',          115000.00, '2020-11-20'),
+        ('David Brown',    'Design',       'UX Designer',               95000.00, '2023-01-10'),
+        ('Eva Martinez',   'Marketing',    'Marketing Lead',            98000.00, '2021-06-05'),
+        ('Frank Lee',      'Engineering',  'Backend Developer',         110000.00, '2022-03-22'),
+        ('Grace Kim',      'Data',         'Data Analyst',              102000.00, '2023-04-18'),
+        ('Henry Wilson',   'Engineering',  'Cloud Architect',           130000.00, '2020-08-30')
+    ON CONFLICT DO NOTHING;
