@@ -8,7 +8,7 @@ A fully containerized, production-grade two-tier application deployed on Amazon 
 
 |        Resource            |                    URL                                                                                                                 |
 | -------------------------- | -------------------------------------------------------------------------                                                              |
-| **Source Code Repository** |   `https://github.com/ShibamKumar/kubernetes/tree/develop`                                                                             |
+| **Source Code Repository** |   `https://github.com/ShibamKumar/kubernetes/tree/develop/`                                                                             |
 | **Docker Hub Image**       |   `https://hub.docker.com/repository/docker/shibamkumar1234/k8s-api-service`                                                           | 
 | **Application URL**        |  `http://ab3c454611e974f6fb01fb40c41b2fd3-e2caba10a50d21d8.elb.us-east-1.amazonaws.com`                                                |
 | **Live API Endpoint**      |   `http://ab3c454611e974f6fb01fb40c41b2fd3-e2caba10a50d21d8.elb.us-east-1.amazonaws.com/api/records`                                   |
